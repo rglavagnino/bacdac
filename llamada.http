@@ -1,0 +1,33 @@
+get  http://localhost:3000/
+Content-Type: application/json
+
+{
+   
+}
+
+###
+post http://localhost:3000/version
+Content-Type: application/json
+
+{
+    "version": "alfa"
+    ,"alias": "Inicio de los tiempos"
+    ,"descripcion": "probando nest"
+    ,"numero":3
+}
+
+###
+get http://localhost:3000/version
+Content-Type: application/json
+
+{
+  
+}
+
+###
+get http://localhost:3000/version/3
+Content-Type: application/json
+
+{
+  
+}
