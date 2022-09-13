@@ -6,39 +6,39 @@ export class VersionController {
     constructor(private readonly versionSrv: VersionService){}
     
     @Post()
-    mostrarVersion(
+    async mostrarVersion(
         @Body('version') tituloVersion:string
     , @Body('descripcion') descripcionVersion:string
     , @Body('alias') aliasVersion: string
     , @Body('numero') numeroVersion: number
     ) {
-        const ver =  this.versionSrv.insertarVersion(tituloVersion,descripcionVersion,aliasVersion,numeroVersion);
+        const ver =  await this.versionSrv.insertarVersion(tituloVersion,descripcionVersion,aliasVersion,numeroVersion);
         return{version:ver};
     } 
 
     @Get()
-    obtenerTodasLasVersion() {
-        return this.versionSrv.obtenerVersiones();
+    async obtenerTodasLasVersion() {
+        return await this.versionSrv.obtenerVersiones();
     }
 
     @Get(':num')
-    obtenerVersion(@Param('num') numero:number){
-        return this.versionSrv.obtenerVersion(numero)
+    async obtenerVersion(@Param('num') numero:number){
+        return await this.versionSrv.obtenerVersion(numero)
     }
 
     @Patch(':num')
-    actualizarVersion(@Param('num') numero:number
+    async actualizarVersion(@Param('num') numero:number
     ,@Body('version') tituloVersion:string
     , @Body('descripcion') descripcionVersion:string
     , @Body('alias') aliasVersion: string
     ){
-        this.versionSrv.actualizarVersion(
+        await this.versionSrv.actualizarVersion(
             numero,tituloVersion,descripcionVersion,aliasVersion
         )   
     }
 @Delete(':num')
-    borrarVersion(@Param('num') numero:number){
-        this.versionSrv.borrarVersion(numero)
-
+    async borrarVersion(@Param('num') numero:number){
+        const n = await this.versionSrv.borrarVersion(numero)
+        return {'Borrados':n}
     }
 }

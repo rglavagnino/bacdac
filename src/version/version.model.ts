@@ -1,8 +1,20 @@
-export class Version {
+import mongoose, * as moongoose from 'mongoose'
 
-    constructor( public version : string,
-        public descripcion:string,
-        public alias:string,
-        public numero:number ){ }
+export const versionSchema = new mongoose.Schema({
+    version : {
+        type:String
+       , required: true
+    },
+    descripcion: String,
+    alias: String,
+    numero: Number
+}, {collection:'versiones'})
+
+export interface Version extends moongoose.Document {
+
+  version : string,
+         descripcion:string,
+         alias:string,
+         numero:number 
 
 }

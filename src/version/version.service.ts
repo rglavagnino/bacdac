@@ -1,33 +1,53 @@
 import { Injectable , NotFoundException} from '@nestjs/common';
 import { Version } from './version.model';
+import {InjectModel} from '@nestjs/mongoose'
+import { Model } from 'mongoose';
+import { profileEnd } from 'console';
+
 
 @Injectable()
 export class VersionService {
     private version: Version[] = [];
+    constructor(@InjectModel('Version') private readonly versionModelo:Model<Version>) {}
 
-    insertarVersion(
+    async insertarVersion(
         version:string
         ,descripcion:string
         ,alias: string
         ,numero:number
-    ): string{
-        const nuevaVersion = new Version(version,descripcion,alias,numero)
-        this.version.push(nuevaVersion)
-        return 'version' + version
+    ){
+        const nuevaVersion = new this.versionModelo({
+            version:version
+            ,descripcion:descripcion
+            ,alias:alias
+            ,numero:numero
+        })
+        const resultadoVersion =await nuevaVersion.save()
+        console.log(resultadoVersion.id)
+
+        return resultadoVersion.id as string
     }
 
-    obtenerVersiones(){
-        return [...this.version];
+    async obtenerVersiones(){
+        const resul = await  this.versionModelo.find().exec();
+        return resul.map((ver)=>({
+            id:ver.id,
+            version:ver.version,
+            descripcion:ver.descripcion,
+            alias:ver.alias,
+            numero:ver.numero
+        }))
     }
 
-    obtenerVersion(num: number){
-        const vers = this.buscarVersion(num)[0]
-        return {...vers};
+    async obtenerVersion(num: number){
+        const vers = await this.buscarVersion(num)
+        return {id: vers._id, version:vers.version, descripcion:vers.descripcion,
+        alias:vers.alias, numero:vers.numero};
     }
 
-    actualizarVersion(numero: number, version: string, descripicion: string, alias:string){
-        const [ver, ind] = this.buscarVersion(numero)
-        const verAct = this.version[ind] = {...ver,}
+    async actualizarVersion(numero: number, version: string, descripicion: string, alias:string){
+        const verAct = await this.buscarVersion(numero)
+        
         if (version){
             verAct.version = version;
         }
@@ -38,20 +58,21 @@ export class VersionService {
             verAct.version = version
         }
 
-        this.version[ind] = verAct
+        await verAct.save()
     }
 
-    buscarVersion(num:number):[Version,number]{
-        const versIndex = this.version.findIndex((ver) => ver.numero == num);
-        const vers = this.version[versIndex]
+    private async buscarVersion(num:number):Promise<Version>{
+        const vers = await this.versionModelo.findOne({numero:num})
         if (!vers){
             throw new NotFoundException('No hay version')
         }
-        return [vers,versIndex];
+        return vers;
     }
 
-    borrarVersion(num:number){
-        const[ver,ind] = this.buscarVersion(num)
-        this.version.splice(ind,1)
+    async borrarVersion(num:number){
+        // const[ver,ind] = this.buscarVersion(num)
+        // this.version.splice(ind,1)
+        let result = await this.versionModelo.deleteOne({numero:num}).exec()
+        return result.deletedCount
     }
 }
